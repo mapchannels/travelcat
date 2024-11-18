@@ -1,0 +1,231 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Fly The World</title>
+    <link rel="icon" href="https://tripgeo.com/tripgeo.png" type="image/png">
+    <link rel="stylesheet" href="style.css" />
+    <script src="js/main.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/model.js"></script>
+    <script src="js/layout_panels.js"></script>
+    <script src="js/input.js"></script>
+    <script src="js/sync.js"></script>
+    <script src="js/earth.js"></script>
+    <script src="js/controls.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/streetview.js"></script>
+    <script src="js/vehicle.js"></script>
+    <script src="js/fly.js"></script>
+    <script src="js/animation.js"></script>
+    <script src="js/track.js"></script>
+    <script src="js/export.js"></script>
+    <script src="js/util.js"></script>
+    <script>
+         /*
+         * Travel Cat
+         * Copyright (c) 2024 Map Channels (https://www.mapchannels.com)
+         * Released on TripGeo (https://tripgeo.com)
+         *
+         * Licensed under the Apache License, Version 2.0 (the "License");
+         * you may not use this code except in compliance with the License.
+         * You may obtain a copy of the License at
+         *
+         *     http://www.apache.org/licenses/LICENSE-2.0
+         *
+         * Unless required by applicable law or agreed to in writing, software
+         * distributed under the License is distributed on an "AS IS" BASIS,
+         * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+         * See the License for the specific language governing permissions and
+         * limitations under the License.
+         *
+         * This notice and the above license must be retained in all derivative works.
+         */
+
+        // Get your Google Maps API Key : https://developers.google.com/maps/documentation/javascript/get-api-key
+        var  apikey = "ADD_YOUR_API_KEY";
+
+        var lat = 49.007883;
+        var lng = 2.550786;
+        var alt = 600;
+        var hdg = 225;
+
+        window.onload = function() {
+            fly.Initialize(apikey, lat, lng, alt, hdg);
+        };
+    </script>
+</head>
+<body>
+    <div id="flydiv" style="width:100%; height:100vh; background-color:beige">Loading</div>
+
+    <div class="modal-overlay" id="overlay"></div>
+    <div class="modal-content" id="modal">
+        <button class="close-btn" onclick="fly.closeModal()">&times;</button>
+
+        <div class="tab-links">
+            <button class="tab-link active" data-tab="intro" onclick="fly.switchTab('intro')">Introduction</button>
+            <button class="tab-link" data-tab="howtoplay" onclick="fly.switchTab('howtoplay')">How To Play</button>
+            <button class="tab-link" data-tab="keymaps" onclick="fly.switchTab('keymaps')">Key Mappings</button>
+            <button class="tab-link" data-tab="links" onclick="fly.switchTab('links')">About</button>
+            <button class="tab-link" data-tab="video" onclick="fly.switchTab('video')">Video</button>
+        </div>
+
+        <div id="intro" class="tab-content active">
+            <div style="display: flex; gap: 24px; margin-bottom: 24px;">
+                <div style="flex: 0 0 30%;">
+                    <img src="travelcat_plane.jpg" style="width: 100%; height: auto; border-radius: 8px;" />
+                </div>
+                <div style="flex: 1;">
+
+                    <p>Welcome to Travel Cat - an exciting adventure where you control a globetrotting feline to explore the wonders of the world! With access to a plane, car, and boat, the whole planet is your playground.</p>
+                    <p>
+                        Soar through the skies, cruise the open roads, or sail the seven seas to any destination you choose. Leveraging the power of Google 3D Maps and Street View, Travel Cat brings the world to life in immersive detail.
+                    </p>
+                    <p>
+                        Want to climb the Eiffel Tower? Easy. Race through the streets of Tokyo? You got it. Island hop in the Caribbean? All it takes is a few clicks. With the ability to travel at high speeds and make quantum leaps to any location, there are no limits to where you can go and what you can discover.
+                    </p>
+                    <p>
+                        So pack your bags and get ready for the trip of a lifetime with your trusty Travel Cat. A world of adventure awaits!
+                    </p>
+
+                    <br />
+                    <p>
+                        <button class="help-btn" onclick="fly.closeModal()">Start Travelling!</button>
+                    </p>
+
+                </div>
+            </div>
+        </div>
+
+        <div id="howtoplay" class="tab-content">
+            <div style="display: flex; gap: 24px; margin-bottom: 24px;">
+                <div style="flex: 0 0 30%;">
+                    <img src="travelcat_car.jpg" style="width: 100%; height: auto; border-radius: 8px;" />
+                </div>
+                <div style="flex: 1;">
+                    <h2 style="margin-top: 0;">How To Play</h2>
+                    <p>There are two main modes in the game: fly mode and drive mode.</p>
+                    <p>
+                        In <b>fly mode</b> you steer the plane using the mouse and accelerate/decelerate with the keyboard controls W and S.
+                        Click on a map point that has street view imagery to change to drive mode.
+                    </p>
+                    <p>
+                        In <b>drive mode</b> steer the car using the street view interface.
+                        The system is semi-automatic, the car will attempt to travel in the direction that you face in street view.
+                        You can manually navigate by clicking the street view direction arrows. You can also click on the 3D map to change location.
+                        Press the escape key to return to fly mode.
+                    </p>
+                    <p>
+                        To save the route you have travelled: Click the <b>Export</b> button to download a KML file containing your route data.
+                    </p>
+
+                </div>
+            </div>
+
+        </div>
+
+
+
+
+        <div id="keymaps" class="tab-content">
+            <div style="display: flex; gap: 24px; margin-bottom: 24px;">
+                <div style="flex: 0 0 30%;">
+                    <img src="travelcat_boat.jpg" style="width: 100%; height: auto; border-radius: 8px;" />
+                </div>
+                <div style="flex: 1;">
+                    <h2>Keyboard Controls</h2>
+
+                    <h4>Fly mode</h4>
+                    <div class="key-mapping">
+                        <span class="key">W Z</span>
+                        <span>Accelerate</span>
+
+                        <span class="key">S</span>
+                        <span>Decelerate</span>
+
+                        <span class="key">Control</span>
+                        <span>Stop</span>
+
+                        <span class="key">V</span>
+                        <span>Change camera view</span>
+
+                        <span class="key">R ↑ ← → ↓</span>
+                        <span>Hold down for alternate camera views</span>
+
+
+                    </div>
+
+                    <h4>Drive mode</h4>
+                    <div class="key-mapping">
+                        <span class="key">B</span>
+                        <span>Switch between the car and boat</span>
+
+                        <span class="key">Escape</span>
+                        <span>Return to fly mode</span>
+                    </div>
+
+                    <h4>General</h4>
+                    <div class="key-mapping">
+                        <span class="key">Q</span>
+                        <span>Quantum leap: fly to anywhere in the world</span>
+
+                        <span class="key">Space bar</span>
+                        <span>Pause movement</span>
+
+                        <span class="key">M</span>
+                        <span>Toggle the secondary map</span>
+
+                        <span class="key">H</span>
+                        <span>Display help</span>
+
+                        <span class="key">L</span>
+                        <span>Toggle labels on the 3D map</span>
+
+                        <span class="key">F11</span>
+                        <span>Toggle full screen mode</span>
+                    </div>
+
+
+                </div>
+            </div>
+
+        </div>
+
+
+        <div id="links" class="tab-content">
+            <div style="display: flex; gap: 24px; margin-bottom: 24px;">
+                <div style="flex: 0 0 35%;">
+                    <img src="travelcat_france.jpg" style="width: 100%; height: auto; border-radius: 8px;" />
+                </div>
+                <div style="flex: 1;">
+                    <h2 style="margin-top: 0;">About</h2>
+                    <p>Travel Cat is a game developed by Map Channels in November 2024 for the Google Photorealistic 3D Maps Challenge.</p>
+                    <p>It is recommended to use a desktop browser. A keyboard and mouse are also required.</p>
+                    <p>The game is a further evolution of previous Map Channels projects such as Street View Driver and Animated Route Maps.</p>
+                    <p>Please send feedback to : <a href="https://www.mapchannels.com/contact.aspx" target="_blank">Map Channels</a></p>
+
+                    <h2>Credits</h2>
+                    <p>The 3D models were created uing Tripo3D.ai. The cat art was created using Flux.</p>
+
+                    <h2>Useful Links</h2>
+                    <ul>
+                        <li><a href="https://tripgeo.com/" target="_blank">TripGeo</a></li>
+                        <li><a href="https://www.mapchannels.com/" target="_blank">Map Channels</a></li>
+                        <li><a href="https://googlemapsmania.blogspot.com/" target="_blank">Maps Mania</a></li>
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+
+        <div id="video" class="tab-content">
+            <div class="video-wrapper">
+                <iframe src="https://www.youtube.com/embed/pybkJ6XswcI?si=IbkUJQBqsE8k5ZVF" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+        </div>
+
+    </div>
+
+
+</body>
+</html>
