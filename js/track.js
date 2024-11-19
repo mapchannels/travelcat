@@ -7,8 +7,8 @@ fly.CreateTrackClass = function ()
         constructor(map, trackType)
         {
             this.map = map;
-            this.trackType = trackType;
             this.points = [];
+            this.points3d = [];
             this.polyline = new google.maps.Polyline({
                 path: this.points,
                 geodesic: true,
@@ -19,12 +19,15 @@ fly.CreateTrackClass = function ()
             });
         };
 
-        addPoint(lat, lng, trackType)
+        addPoint(lat, lng, alt)
         {
             var pt = new google.maps.LatLng(lat, lng);
-            pt.trackType = trackType;
 
             this.points.push(pt);
+
+            var ept = { lat: lat, lng: lng, altitude: alt };
+            this.points3d.push(ept);
+
             this.updatePolyline();
 
             // sync the map
@@ -44,6 +47,7 @@ fly.CreateTrackClass = function ()
         clearPoints()
         {
             this.points = [];
+            this.points3d = [];
             this.updatePolyline();
         };
 

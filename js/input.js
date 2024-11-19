@@ -118,6 +118,7 @@ fly.m_initKeyboard = function ()
             case "KeyL":        // toggle 3d map labels
                 fly.m_showLabels = !fly.m_showLabels;
                 fly.m_earthMap.defaultLabelsDisabled = !fly.m_showLabels;
+                fly.m_displayMessage("Labels " + (fly.m_showLabels ? "On" : "Off"));
                 break;
 
             case "KeyB":        // boat mode

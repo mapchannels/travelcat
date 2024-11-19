@@ -153,74 +153,102 @@ fly.m_findNearestStreetView = function (ept)
     });
 }
 
-
-// Used during drive mode animation. Ever few seconds find the next panorama and move there
+// Used during drive mode animation. Every few seconds find the next panorama and move there
 fly.m_findNextStreetView = function ()
 {
     if (this.m_streetViewSearchInProgress) return;
 
-    // Get the current facing within panorama
-    var currentFacing = this.pan.getPov().heading;
+    const currentPosition = this.pan.getPosition();
+    const currentHeading = this.pan.getPov().heading;
+    const currentPano = this.pan.getPano();
+    let possiblePanoramas = [];
 
-    // Get the current panorama data
-    this.m_streetviewService.getPanoramaByLocation(this.pan.getPosition(), 50, (data, status) =>
+    // Get the current panorama data for connected links
+    this.m_streetviewService.getPanoramaByLocation(currentPosition, 50, (data, status) =>
     {
         if (status === google.maps.StreetViewStatus.OK)
         {
-            // List of connected panoramas
-            const links = data.links;
-
-            // Find the panorama link closest to the current heading
-            let closestPanorama = null;
-            let closestHeadingDiff = Infinity;
-
-            links.forEach(link =>
+            // Add connected panoramas to possibilities
+            data.links.forEach(link =>
             {
-                // Calculate the difference between link heading and current facing direction
-                const headingDiff = Math.abs(link.heading - currentFacing);
-
-                // Normalize the difference to be within [0, 180] range for comparison
-                const normalizedDiff = Math.min(headingDiff, 360 - headingDiff);
-
-                // Update if this is the closest direction
-                if (normalizedDiff < closestHeadingDiff)
-                {
-                    closestHeadingDiff = normalizedDiff;
-                    closestPanorama = link;
-                }
+                possiblePanoramas.push({
+                    pano: link.pano,
+                    heading: link.heading,
+                    position: null,
+                    headingDiff: Math.abs(((link.heading - currentHeading + 540) % 360) - 180)
+                });
             });
 
-            // If a closest panorama link is found, load it
-            if (closestPanorama)
+            // Calculate point 5m ahead of current position
+            const forwardPoint = google.maps.geometry.spherical.computeOffset(
+                currentPosition,
+                5, // 5 meters forward
+                currentHeading
+            );
+
+            // Find panorama near the forward point
+            this.m_streetviewService.getPanorama({
+                location: forwardPoint,
+                preference: google.maps.StreetViewPreference.NEAREST,
+                radius: 5,
+                sources: [google.maps.StreetViewSource.GOOGLE]
+            }, (forwardData, forwardStatus) =>
             {
-                var pt = fly.pan.getPosition();
-
-                fly.m_track.addPoint(pt.lat(), pt.lng());
-
-                fly.pan.setPano(closestPanorama.pano);
-
-                var pov = fly.pan.getPov();
-
-                if (fly.m_focus != fly.MAP)
+                if (forwardStatus === google.maps.StreetViewStatus.OK)
                 {
-                    // change heading unless focused on street view
-                    pov.heading = closestPanorama.heading;
-                    fly.pan.setPov(pov);
+                    const forwardPano = {
+                        pano: forwardData.location.pano,
+                        heading: currentHeading,
+                        position: forwardData.location.latLng,
+                        headingDiff: 0 // Forward point maintains current heading
+                    };
+
+                    // Only add if it's not already in our list
+                    if (!possiblePanoramas.some(p => p.pano === forwardPano.pano))
+                    {
+                        possiblePanoramas.push(forwardPano);
+                    }
                 }
 
-                this.m_userVehicle.pt = pt;
-                this.m_userVehicle.heading = closestPanorama.heading;
-            } else
-            {
-                // No suitable panorama link found.
-                fly.m_displayMessage("No Street View found");
-            }
-        }
-        else
+                // Find best panorama using a loop
+                let bestPano = null;
+                let smallestDiff = Infinity;
+
+                for (let pano of possiblePanoramas)
+                {
+                    if (pano.pano !== currentPano && pano.headingDiff < smallestDiff)
+                    {
+                        smallestDiff = pano.headingDiff;
+                        bestPano = pano;
+                    }
+                }
+
+                // Update track and move to new panorama if found
+                if (bestPano)
+                {
+                    fly.m_track.addPoint(currentPosition.lat(), currentPosition.lng(), fly.m_groundAltitude);
+                    fly.pan.setPano(bestPano.pano);
+
+                    if (fly.m_focus != fly.MAP)
+                    {
+                        // Update heading if not focused on street view
+                        const pov = fly.pan.getPov();
+                        pov.heading = bestPano.heading;
+                        fly.pan.setPov(pov);
+                    }
+
+                    this.m_userVehicle.pt = currentPosition;
+                    this.m_userVehicle.heading = bestPano.heading;
+                }
+                else
+                {
+                    fly.m_displayMessage("No Street View found");
+                }
+            });
+        } else
         {
             fly.m_displayMessage("No Street View found");
         }
     });
-
 }
 

@@ -55,7 +55,7 @@ fly.animationCycle = function ()
                 if (this.m_animationCycleCount % 5 == 0)
                 {
                     var l_earthCentre = this.m_earthMap.center;
-                    this.m_track.addPoint(l_earthCentre.lat, l_earthCentre.lng);
+                    this.m_track.addPoint(l_earthCentre.lat, l_earthCentre.lng, l_earthCentre.altitude);
                 }
 
                 break;
