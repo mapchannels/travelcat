@@ -2,7 +2,9 @@
 TRAVEL CAT
 
 Visit either of these URLs to launch Travel Cat.
+
 https://tripgeo.com/travelcat
+
 https://tripgeo.com/fly/main.html
 
 "Travel Cat" is a game / exploration tool that combines Google Photorealistic 3D Maps, Google Street View and Google 2D Maps. In "Travel Cat" you control a cat with a thirst for adventure who can travel and explore any location in the world. You have a choice of vehicle: plane, car or boat. 
